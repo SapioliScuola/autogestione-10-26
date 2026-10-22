@@ -1,8 +1,125 @@
-<script>
-    // Hash SHA-256 della password "docente2026"
-    const TEACHER_PASSWORD_HASH = "e0e15db7ea2b7246473edffbe901763aa5391262d08a9c33cd5eb0ca20ad9eb2";
-    
-    let isTeacher = false;
+<!DOCTYPE html>
+<html lang="it" class="h-full bg-slate-900 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attività Didattica Interattiva - Social & Word Wall</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @keyframes floatBubble {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-6px) scale(1.03); }
+    }
+    .animate-float { animation: floatBubble 4s ease-in-out infinite; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+  </style>
+
+  <!-- Firebase SDK (v10) per Sincronizzazione Real-Time -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // =========================================================================
+    // ⚠️ SOSTITUISCI QUESTA SEZIONE CON I TUOI DATI DI FIREBASE
+    // =========================================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyBoZnEHxc_bBRdP84fJJyrfTd8r3jYjL6E",
+  authDomain: "autogestione-10-26.firebaseapp.com",
+  projectId: "autogestione-10-26",
+  storageBucket: "autogestione-10-26.firebasestorage.app",
+  messagingSenderId: "348550005255",
+  appId: "1:348550005255:web:c25572e28337633bdb20a2",
+  measurementId: "G-LQYHDLHBHQ"
+};
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.db = db;
+    window.fbMethods = { collection, onSnapshot, addDoc, deleteDoc, doc, getDocs };
+  </script>
+</head>
+<body class="min-h-full flex flex-col font-sans bg-slate-900 text-slate-100">
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="bg-gradient-to-tr from-indigo-500 to-purple-500 p-2 rounded-xl text-white shadow-lg shadow-indigo-500/20">
+          <i data-lucide="sparkles" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-white">Social Analysis & Word Cloud</h1>
+          <p class="text-xs text-slate-400 hidden sm:block">Laboratorio Interattivo Real-Time</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Live Cloud
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENUTO PRINCIPALE -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+    <!-- PANNELLO DOCENTE (LIBERO / ACCESSIBILE A TUTTI) -->
+    <section class="bg-slate-800/80 border border-indigo-500/30 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-700/60">
+        <div class="flex items-center gap-3">
+          <div class="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg border border-indigo-500/20">
+            <i data-lucide="settings" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-white">Pannello Gestione Docente</h2>
+            <p class="text-xs text-slate-400">Crea moduli di analisi, scarica i dati o azzera le risposte</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="exportWordsCSV()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-700 hover:bg-slate-600 text-slate-200 transition flex items-center gap-1.5">
+            <i data-lucide="download" class="w-4 h-4"></i> Esporta CSV
+          </button>
+          <button onclick="confirmResetAll()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/10 text-rose-300 border border-rose-500/30 hover:bg-rose-500/20 transition flex items-center gap-1.5">
+            <i data-lucide="trash-2" class="w-4 h-4"></i> Resetta Tutto
+          </button>
+        </div>
+      </div>
+
+      <form onsubmit="handleCreateCategory(event)" class="space-y-4">
+        <h3 class="text-sm font-semibold text-slate-200">Aggiungi Nuova Categoria / Modulo</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input type="text" id="catTitle" required placeholder="Titolo Categoria *" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+          <input type="text" id="catDesc" placeholder="Descrizione o domande per gli studenti" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+        </div>
+        <textarea id="catResources" rows="2" placeholder="Incolla qui l'embed di Instagram/TikTok o link YouTube/Web..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"></textarea>
+        <button type="submit" class="px-4 py-2 rounded-lg text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-2">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i> Crea Categoria
+        </button>
+      </form>
+    </section>
+
+    <!-- STATO VUOTO -->
+    <div id="emptyState" class="text-center py-16 bg-slate-800/40 border border-dashed border-slate-700 rounded-2xl p-8">
+      <i data-lucide="layout-grid" class="w-10 h-10 text-slate-500 mx-auto mb-3"></i>
+      <h3 class="text-lg font-bold text-slate-300 mb-1">In Attesa di Moduli</h3>
+      <p class="text-sm text-slate-400">Crea il primo modulo dal pannello in alto per iniziare l'attività.</p>
+    </div>
+
+    <!-- CATEGORIE E PAROLE -->
+    <div id="categoriesContainer" class="space-y-16"></div>
+
+  </main>
+
+  <script>
     let categories = [];
     let wordEntries = [];
 
@@ -11,25 +128,19 @@
       initFirebaseListeners();
     });
 
-    // Funzione SHA-256 corretta e compatibile
-    async function hashPassword(str) {
-      const msgUint8 = new TextEncoder().encode(str);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-
     function initFirebaseListeners() {
       const checkFB = setInterval(() => {
         if (window.db && window.fbMethods) {
           clearInterval(checkFB);
           const { collection, onSnapshot } = window.fbMethods;
 
+          // Ascolto Categorie Real-Time
           onSnapshot(collection(window.db, "categories"), (snapshot) => {
             categories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             renderApp();
           });
 
+          // Ascolto Parole Real-Time
           onSnapshot(collection(window.db, "words"), (snapshot) => {
             wordEntries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             categories.forEach(c => renderCategoryWords(c.id));
@@ -38,69 +149,8 @@
       }, 100);
     }
 
-    function toggleTeacherMode() {
-      if (isTeacher) lockTeacherMode(); else openPasswordModal();
-    }
-
-    function openPasswordModal() {
-      document.getElementById("passwordError").classList.add("hidden");
-      document.getElementById("inputTeacherPassword").value = "";
-      document.getElementById("passwordModal").classList.remove("hidden");
-      document.getElementById("inputTeacherPassword").focus();
-    }
-
-    function closePasswordModal() {
-      document.getElementById("passwordModal").classList.add("hidden");
-    }
-
-    // Gestione Password Corretta
-    async function handlePasswordSubmit(e) {
-      e.preventDefault();
-      const pwd = document.getElementById("inputTeacherPassword").value.trim();
-      const userHash = await hashPassword(pwd);
-
-      if (userHash === TEACHER_PASSWORD_HASH) {
-        isTeacher = true;
-        closePasswordModal();
-        updateTeacherUI();
-      } else {
-        document.getElementById("passwordError").classList.remove("hidden");
-      }
-    }
-
-    function lockTeacherMode() {
-      isTeacher = false;
-      updateTeacherUI();
-    }
-
-    function updateTeacherUI() {
-      const toolbar = document.getElementById("teacherToolbar");
-      const icon = document.getElementById("teacherIcon");
-      const text = document.getElementById("teacherStatusText");
-
-      if (isTeacher) {
-        toolbar.classList.remove("hidden");
-        if (icon) {
-          icon.setAttribute("data-lucide", "unlock");
-          icon.className = "w-4 h-4 text-emerald-400";
-        }
-        if (text) text.textContent = "Docente Attivo";
-      } else {
-        toolbar.classList.add("hidden");
-        if (icon) {
-          icon.setAttribute("data-lucide", "lock");
-          icon.className = "w-4 h-4 text-amber-400";
-        }
-        if (text) text.textContent = "Modalità Docente";
-      }
-      lucide.createIcons();
-      renderApp();
-    }
-
     async function handleCreateCategory(e) {
       e.preventDefault();
-      if (!isTeacher) return;
-
       const title = document.getElementById("catTitle").value.trim();
       const desc = document.getElementById("catDesc").value.trim();
       const rawRes = document.getElementById("catResources").value.trim();
@@ -178,9 +228,12 @@
               <h2 class="text-2xl font-bold text-white">${escapeHtml(cat.title)}</h2>
               ${cat.description ? `<p class="text-sm text-slate-300 mt-1">${escapeHtml(cat.description)}</p>` : ""}
             </div>
-            ${isTeacher ? `<button onclick="deleteCategory('${cat.id}')" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/30">Elimina Modulo</button>` : ""}
+            <button onclick="deleteCategory('${cat.id}')" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/30 hover:bg-rose-500/20 transition flex items-center gap-1">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Elimina Modulo
+            </button>
           </div>
 
+          <!-- SEZIONE 1: POST / MEDIA -->
           <div class="space-y-3">
             <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
               <i data-lucide="media" class="w-4 h-4 text-indigo-400"></i> Sezione 1: Contenuti Social
@@ -190,14 +243,18 @@
             </div>
           </div>
 
+          <!-- SEZIONE 2: INPUT STUDENTE -->
           <div class="bg-slate-900/80 border border-slate-700/80 rounded-2xl p-5 sm:p-6 space-y-4">
             <h3 class="text-sm font-bold text-white">Sezione 2: La tua descrizione (Anonimo)</h3>
             <form onsubmit="handleWordSubmit(event, '${cat.id}')" class="flex flex-col sm:flex-row gap-3">
               <input type="text" id="wordInput_${cat.id}" required placeholder="Scrivi una parola..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500">
-              <button type="submit" class="px-6 py-3 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition">Invia Parola</button>
+              <button type="submit" class="px-6 py-3 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center justify-center gap-2">
+                <i data-lucide="send" class="w-4 h-4"></i> Invia Parola
+              </button>
             </form>
           </div>
 
+          <!-- SEZIONE 3: MURO CLOUD -->
           <div class="space-y-4">
             <div class="flex items-center justify-between">
               <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Sezione 3: Muro delle Parole della Classe</h3>
@@ -253,13 +310,13 @@
     }
 
     async function deleteCategory(categoryId) {
-      if (!isTeacher || !confirm("Eliminare questa categoria?")) return;
+      if (!confirm("Eliminare questa categoria?")) return;
       const { doc, deleteDoc } = window.fbMethods;
       await deleteDoc(doc(window.db, "categories", categoryId));
     }
 
     async function confirmResetAll() {
-      if (!isTeacher || !confirm("Cancellare TUTTO il database?")) return;
+      if (!confirm("Cancellare TUTTO il database?")) return;
       const { collection, getDocs, deleteDoc, doc } = window.fbMethods;
       const cats = await getDocs(collection(window.db, "categories"));
       cats.forEach(async d => await deleteDoc(doc(window.db, "categories", d.id)));
@@ -282,3 +339,6 @@
 
     function escapeHtml(str) { return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m])); }
   </script>
+  <script async src="//www.instagram.com/embed.js"></script>
+</body>
+</html>
