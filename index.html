@@ -1,791 +1,636 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" class="h-full bg-slate-900 text-slate-100">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Social Word Wall - Attività Didattica Interattiva</title>
-    
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts Inter & Outfit -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- External Social Scripts -->
-    <script async src="https://www.instagram.com/embed.js"></script>
-    <script async src="https://www.tiktok.com/embed.js"></script>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        display: ['Outfit', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#f0f6ff',
-                            100: '#e0edff',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        .word-bubble {
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .word-bubble:hover {
-            transform: scale(1.1) translateY(-4px);
-        }
-        /* Custom scrollbars */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 9999px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attività Didattica Interattiva - Social & Word Wall</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @keyframes floatBubble {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-6px) scale(1.03); }
+    }
+    .animate-float {
+      animation: floatBubble 4s ease-in-out infinite;
+    }
+    /* Estetica scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+  </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+<body class="min-h-full flex flex-col font-sans antialiased bg-slate-900 text-slate-100 selection:bg-indigo-500 selection:text-white">
 
-    <!-- Header / Navbar -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center text-white shadow-md">
-                    <i class="fa-solid font-bold fa-layer-group text-lg"></i>
-                </div>
-                <div>
-                    <h1 class="font-display font-bold text-xl text-slate-900 leading-tight">Word Wall Didattica</h1>
-                    <p class="text-xs text-slate-500">Laboratorio Social & Media Literacy</p>
-                </div>
-            </div>
-
-            <div class="flex items-center space-x-2 sm:space-x-3">
-                <!-- Status Badge -->
-                <div id="sync-status" class="hidden sm:flex items-center space-x-2 text-xs bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full border border-emerald-200">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span id="sync-text">Sincronizzato</span>
-                </div>
-
-                <!-- Modale Hosting Info -->
-                <button onclick="openModal('guide-modal')" class="text-xs sm:text-sm px-3 py-2 text-slate-600 hover:text-slate-900 font-medium transition flex items-center space-x-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg">
-                    <i class="fa-solid fa-cloud-arrow-up text-indigo-600"></i>
-                    <span class="hidden sm:inline">Guida</span> Cloud
-                </button>
-
-                <!-- Modalita Docente Toggle -->
-                <button onclick="toggleTeacherMode()" id="teacher-toggle-btn" class="text-xs sm:text-sm px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-medium transition flex items-center space-x-1.5 shadow-sm">
-                    <i class="fa-solid fa-user-shield text-yellow-400"></i>
-                    <span id="teacher-btn-text">Pannello Docente</span>
-                </button>
-            </div>
+  <!-- HEADER / BARRA SUPERIORE -->
+  <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="bg-gradient-to-tr from-indigo-500 to-purple-500 p-2 rounded-xl text-white shadow-lg shadow-indigo-500/20">
+          <i data-lucide="sparkles" class="w-6 h-6"></i>
         </div>
-    </header>
+        <div>
+          <h1 class="text-lg font-bold bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+            Social Analysis & Word Cloud
+          </h1>
+          <p class="text-xs text-slate-400 hidden sm:block">Laboratorio di Analisi Critica dei Contenuti Digitali</p>
+        </div>
+      </div>
 
-    <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full space-y-10">
+      <div class="flex items-center gap-2">
+        <!-- Badge Stato Connessione -->
+        <span id="connectionBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Connesso
+        </span>
 
-        <!-- Form Inserimento Nuova Categoria -->
-        <section class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200/80">
-            <div class="max-w-3xl">
-                <div class="flex items-center space-x-2 text-indigo-600 font-semibold text-sm mb-1">
-                    <i class="fa-solid fa-plus-circle"></i>
-                    <span>NUOVA SEZIONE DIDATTICA</span>
-                </div>
-                <h2 class="font-display text-2xl font-bold text-slate-900 mb-2">Crea una nuova Categoria o Attività</h2>
-                <p class="text-sm text-slate-600 mb-6">Compila il modulo per generare una nuova scheda con risorse social/web e Word Wall dedicata. I nuovi form creati si aggiungeranno in coda senza cancellare le sezioni precedenti.</p>
+        <!-- Tasto Login / Toggle Docente -->
+        <button id="btnTeacherToggle" onclick="toggleTeacherMode()" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
+          <i id="teacherIcon" data-lucide="lock" class="w-4 h-4 text-amber-400"></i>
+          <span id="teacherStatusText">Modalità Docente</span>
+        </button>
+      </div>
+    </div>
+  </header>
 
-                <form id="create-category-form" onsubmit="handleCreateCategory(event)" class="space-y-5">
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">Titolo Categoria / Argomento *</label>
-                        <input type="text" id="cat-title" required placeholder="es. Fake News & Disinformazione su TikTok" 
-                               class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition">
-                    </div>
+  <!-- CONTENUTO PRINCIPALE -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
 
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">Istruzioni o Quesito per gli Studenti *</label>
-                        <textarea id="cat-desc" rows="2" required placeholder="es. Osserva i post sottostanti e scrivi 3 parole chiave che descrivono le strategie di persuasione utilizzate." 
-                                  class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition"></textarea>
-                    </div>
-
-                    <!-- Gestore Inserimento Risorse Dynamic -->
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="block text-sm font-semibold text-slate-700">Risorse Web e Social Embed (Instagram, TikTok, YouTube, Link)</label>
-                            <span class="text-xs text-slate-500">Puoi incollare URL diretti o Codici HTML Embed</span>
-                        </div>
-                        
-                        <div id="resources-inputs-container" class="space-y-3">
-                            <!-- Prima riga risorsa di default -->
-                            <div class="resource-input-row flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-                                <select class="res-type bg-slate-50 border border-slate-300 text-slate-700 text-xs rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-36">
-                                    <option value="url">Link / URL Web</option>
-                                    <option value="instagram">Instagram Post/Reel</option>
-                                    <option value="tiktok">TikTok Video</option>
-                                    <option value="youtube">YouTube Video</option>
-                                    <option value="embed">Codice Embed HTML</option>
-                                </select>
-                                <textarea placeholder="Incolla URL o Codice Embed HTML qui..." rows="1" class="res-content w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 font-mono text-xs"></textarea>
-                                <button type="button" onclick="removeResourceRow(this)" class="text-slate-400 hover:text-red-500 p-2 text-sm self-end sm:self-center">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <button type="button" onclick="addResourceRow()" class="mt-3 text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center space-x-1.5 bg-indigo-50 hover:bg-indigo-100 px-3 py-2 rounded-lg transition">
-                            <i class="fa-solid fa-plus"></i>
-                            <span>Aggiungi un'altra risorsa social/web</span>
-                        </button>
-                    </div>
-
-                    <div class="pt-2 flex justify-end">
-                        <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-md hover:shadow-lg transition flex items-center justify-center space-x-2">
-                            <i class="fa-solid fa-circle-plus"></i>
-                            <span>Crea Sezione Attività</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </section>
-
-        <!-- Stato Vuoto (Se nessuna categoria è ancora stata creata) -->
-        <div id="empty-state" class="text-center py-12 px-4 bg-white rounded-2xl border-2 border-dashed border-slate-200">
-            <div class="w-16 h-16 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
-                <i class="fa-solid fa-folder-open"></i>
-            </div>
-            <h3 class="font-display text-lg font-bold text-slate-800 mb-1">Nessuna Sezione Attiva</h3>
-            <p class="text-sm text-slate-500 max-w-md mx-auto">Utilizza il modulo in alto per aggiungere la prima categoria di lavoro per la tua classe.</p>
+    <!-- BARRA STRUMENTI DOCENTE (Visibile solo in modalità docente sbloccata) -->
+    <section id="teacherToolbar" class="hidden bg-slate-800/80 border border-amber-500/30 rounded-2xl p-6 shadow-xl backdrop-blur-sm relative overflow-hidden">
+      <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
+      
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-700/60">
+        <div class="flex items-center gap-3">
+          <div class="p-2 bg-amber-500/10 rounded-lg text-amber-400 border border-amber-500/20">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-white">Pannello di Controllo Docente</h2>
+            <p class="text-xs text-slate-400">Pannello protetto per la gestione delle categorie e della sessione</p>
+          </div>
         </div>
 
-        <!-- LISTA CATEGORIE DINAMICHE -->
-        <div id="categories-container" class="space-y-12">
-            <!-- Le categorie verranno generate dinamicamente qui -->
+        <div class="flex items-center gap-2 flex-wrap">
+          <button onclick="exportWordsCSV()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600 transition">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            Esporta Dati (CSV)
+          </button>
+          <button onclick="confirmResetAll()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 transition">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            Resetta Tutto
+          </button>
+          <button onclick="lockTeacherMode()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition">
+            <i data-lucide="lock" class="w-4 h-4"></i>
+            Blocca Sessione
+          </button>
+        </div>
+      </div>
+
+      <!-- Form Nuova Categoria -->
+      <form id="formNewCategory" onsubmit="handleCreateCategory(event)" class="space-y-4">
+        <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+          <i data-lucide="folder-plus" class="w-4 h-4 text-indigo-400"></i>
+          Aggiungi Nuova Categoria / Modulo di Analisi
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1">Titolo Categoria *</label>
+            <input type="text" id="catTitle" required placeholder="Es. Comunicazione Politica, Fake News, Marketing..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1">Descrizione / Istruzioni per gli Studenti</label>
+            <input type="text" id="catDesc" placeholder="Es. Osserva i post sottostanti e indica le parole chiave..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+          </div>
         </div>
 
-    </main>
-
-    <!-- Modal Guida Hosting & Deployment -->
-    <div id="guide-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <button onclick="closeModal('guide-modal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-2 text-lg">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
-            <div class="flex items-center space-x-3 mb-4">
-                <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl font-bold">
-                    <i class="fa-solid fa-rocket"></i>
-                </div>
-                <div>
-                    <h3 class="font-display font-bold text-xl text-slate-900">Guida alla Pubblicazione Online Gratis</h3>
-                    <p class="text-xs text-slate-500">Rendi questa app accessibile agli studenti dal loro smartphone</p>
-                </div>
-            </div>
-
-            <div class="space-y-4 text-sm text-slate-600">
-                <p>Per fare in modo che gli studenti possano interagire simultaneamente dai propri dispositivi, pubblica gratuitamente questo singolo file HTML usando uno dei seguenti servizi:</p>
-
-                <div class="border border-slate-200 rounded-xl p-4 bg-slate-50 space-y-2">
-                    <div class="font-semibold text-slate-800 flex items-center justify-between">
-                        <span>1. Netlify Drop (Scelta più rapida)</span>
-                        <span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">Consigliato</span>
-                    </div>
-                    <p class="text-xs">Salva questo codice come file <code class="bg-slate-200 px-1 py-0.5 rounded text-slate-800">index.html</code>, trascina la cartella che lo contiene su <a href="https://app.netlify.com/drop" target="_blank" class="text-indigo-600 font-semibold underline">app.netlify.com/drop</a> e ottieni subito un link pubblico.</p>
-                </div>
-
-                <div class="border border-slate-200 rounded-xl p-4 bg-slate-50 space-y-2">
-                    <div class="font-semibold text-slate-800">2. Vercel o GitHub Pages</div>
-                    <p class="text-xs">Puoi caricare il file su un repository GitHub e attivare GitHub Pages dalle impostazioni, oppure collegarlo a Vercel per un deployment immediato.</p>
-                </div>
-
-                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-amber-800 text-xs space-y-1">
-                    <div class="font-semibold flex items-center space-x-1">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-                        <span>Sincronizzazione Cloud Firebase</span>
-                    </div>
-                    <p>L'applicazione include il supporto automatico per la sincronizzazione tramite Firebase Firestore. Se viene caricata senza chiavi personalizzate, utilizzerà un salvataggio in memoria locale (LocalStorage) con aggancio al database.</p>
-                </div>
-            </div>
-
-            <div class="mt-6 text-right">
-                <button onclick="closeModal('guide-modal')" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-semibold text-sm rounded-xl">Ho capito</button>
-            </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Incolla Codici Embed o URL (Instagram, TikTok, YouTube, Web)</label>
+          <textarea id="catResources" rows="3" placeholder="Incolla qui l'embed di Instagram/TikTok oppure URL diretti (uno per riga o separati da spazio)..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500"></textarea>
+          <p class="text-[11px] text-slate-500 mt-1">Puoi incollare il codice Embed completo fornito da Instagram/TikTok oppure semplici link.</p>
         </div>
+
+        <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-md shadow-indigo-600/30">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          Crea Categoria
+        </button>
+      </form>
+    </section>
+
+    <!-- STATO VUOTO (Se non ci sono ancora categorie) -->
+    <div id="emptyState" class="text-center py-16 bg-slate-800/40 border border-dashed border-slate-700 rounded-2xl p-8">
+      <div class="inline-flex p-4 rounded-full bg-slate-800 text-slate-500 mb-4">
+        <i data-lucide="layout-grid" class="w-10 h-10"></i>
+      </div>
+      <h3 class="text-lg font-bold text-slate-300 mb-1">Nessuna Categoria Presente</h3>
+      <p class="text-sm text-slate-400 max-w-md mx-auto mb-6">
+        Il docente non ha ancora attivato moduli di analisi. Se sei il docente, clicca in alto su <strong>"Modalità Docente"</strong> per aggiungere la prima categoria.
+      </p>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 py-6 mt-12 text-center text-xs text-slate-500">
-        <p>Attività Didattica Interattiva - Realizzato per le scuole &bull; Multi-Category Social Word Wall</p>
-    </footer>
+    <!-- CONTENITORE DINAMICO DELLE CATEGORIE -->
+    <div id="categoriesContainer" class="space-y-16">
+      <!-- Le categorie verranno caricate dinamicamente qui -->
+    </div>
 
-    <!-- Firebase JS SDK (Module & Fallback Init) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  </main>
 
-        // Global State & Firebase Refs
-        window.appData = {
-            categories: [],
-            isTeacherMode: false
-        };
+  <!-- MODALE AUTENTICAZIONE DOCENTE -->
+  <div id="passwordModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20">
+          <i data-lucide="lock" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-white">Accesso Riservato Docente</h3>
+          <p class="text-xs text-slate-400">Inserisci la password per gestire l'attività</p>
+        </div>
+      </div>
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'social-wordwall-app';
-        let db = null;
-        let auth = null;
-        let currentUser = null;
+      <form onsubmit="handlePasswordSubmit(event)" class="space-y-4">
+        <div>
+          <input type="password" id="inputTeacherPassword" required placeholder="Inserisci password..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+          <p id="passwordError" class="text-xs text-rose-400 mt-1.5 hidden flex items-center gap-1">
+            <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> Password errata. Riprova.
+          </p>
+        </div>
 
-        // Inizializzazione Firebase sicura
-        try {
-            if (typeof __firebase_config !== 'undefined') {
-                const firebaseConfig = JSON.parse(__firebase_config);
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closePasswordModal()" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">Annulla</button>
+          <button type="submit" class="px-4 py-2 rounded-lg text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 transition font-bold">
+            Sblocca Accesso
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-                const initAuth = async () => {
-                    try {
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            await signInWithCustomToken(auth, __initial_auth_token);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
-                    } catch (e) {
-                        console.warn("Auth Firebase non riuscita, uso fallback anonimo/locale:", e);
-                    }
-                };
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // -------------------------------------------------------------
+    // COSTANTI & CONFIGURAZIONE
+    // -------------------------------------------------------------
+    const TEACHER_PASSWORD_HASH = "e0e15db7ea2b7246473edffbe901763aa5391262d08a9c33cd5eb0ca20ad9eb2";
+    
+    const LOCAL_STORAGE_KEY_CATS = "app_social_categories_v1";
+    const LOCAL_STORAGE_KEY_WORDS = "app_social_words_v1";
+    const LOCAL_STORAGE_KEY_AUTH = "app_social_is_teacher";
 
-                initAuth();
+    let isTeacher = false;
+    let categories = [];
+    let wordEntries = [];
 
-                onAuthStateChanged(auth, (user) => {
-                    currentUser = user;
-                    if (user) {
-                        document.getElementById('sync-status').classList.remove('hidden');
-                        subscribeToRealtimeData();
-                    }
-                });
-            } else {
-                loadLocalFallback();
-            }
-        } catch (err) {
-            console.warn("Firebase non configurato o in errore, si utilizza LocalStorage:", err);
-            loadLocalFallback();
+    // -------------------------------------------------------------
+    // INIZIALIZZAZIONE
+    // -------------------------------------------------------------
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+      checkSavedAuth();
+      loadDataFromStorage();
+      renderApp();
+
+      // Listener sincronizzazione multi-scheda locale
+      window.addEventListener("storage", (e) => {
+        if (e.key === LOCAL_STORAGE_KEY_CATS || e.key === LOCAL_STORAGE_KEY_WORDS) {
+          loadDataFromStorage();
+          renderApp();
         }
+      });
+    });
 
-        // Ascolto Firestore in tempo reale
-        function subscribeToRealtimeData() {
-            if (!db) return;
-            // Percorso pubblico come da regole
-            const publicColRef = collection(db, 'artifacts', appId, 'public', 'data', 'categories');
+    // Cifratura Password via Web Crypto API (SHA-256)
+    async function hashPassword(str) {
+      const buf = new TextEncoder().encode(str);
+      const hashBuf = await crypto.subtle.digest("SHA-256", buf);
+      const hashArray = Array.from(new Uint8Array(hashBuf));
+      return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    // -------------------------------------------------------------
+    // GESTIONE AUTENTICAZIONE DOCENTE
+    // -------------------------------------------------------------
+    function checkSavedAuth() {
+      isTeacher = localStorage.getItem(LOCAL_STORAGE_KEY_AUTH) === "true";
+      updateTeacherUI();
+    }
+
+    function toggleTeacherMode() {
+      if (isTeacher) {
+        lockTeacherMode();
+      } else {
+        openPasswordModal();
+      }
+    }
+
+    function openPasswordModal() {
+      document.getElementById("passwordError").classList.add("hidden");
+      document.getElementById("inputTeacherPassword").value = "";
+      document.getElementById("passwordModal").classList.remove("hidden");
+      document.getElementById("inputTeacherPassword").focus();
+    }
+
+    function closePasswordModal() {
+      document.getElementById("passwordModal").classList.add("hidden");
+    }
+
+    async function handlePasswordSubmit(e) {
+      e.preventDefault();
+      const pwd = document.getElementById("inputTeacherPassword").value.trim();
+      const hashedInput = await hashPassword(pwd);
+
+      if (hashedInput === TEACHER_PASSWORD_HASH) {
+        isTeacher = true;
+        localStorage.setItem(LOCAL_STORAGE_KEY_AUTH, "true");
+        closePasswordModal();
+        updateTeacherUI();
+      } else {
+        document.getElementById("passwordError").classList.remove("hidden");
+      }
+    }
+
+    function lockTeacherMode() {
+      isTeacher = false;
+      localStorage.setItem(LOCAL_STORAGE_KEY_AUTH, "false");
+      updateTeacherUI();
+    }
+
+    function updateTeacherUI() {
+      const toolbar = document.getElementById("teacherToolbar");
+      const icon = document.getElementById("teacherIcon");
+      const text = document.getElementById("teacherStatusText");
+
+      if (isTeacher) {
+        toolbar.classList.remove("hidden");
+        icon.setAttribute("data-lucide", "unlock");
+        icon.className = "w-4 h-4 text-emerald-400";
+        text.textContent = "Modalità Docente Attiva";
+      } else {
+        toolbar.classList.add("hidden");
+        icon.setAttribute("data-lucide", "lock");
+        icon.className = "w-4 h-4 text-amber-400";
+        text.textContent = "Modalità Docente";
+      }
+      lucide.createIcons();
+      renderApp(); // Riesegue il render per mostrare/nascondere eventuali controlli docente sulle categorie
+    }
+
+    // -------------------------------------------------------------
+    // CARICAMENTO & SALVATAGGIO DATI
+    // -------------------------------------------------------------
+    function loadDataFromStorage() {
+      try {
+        const rawCats = localStorage.getItem(LOCAL_STORAGE_KEY_CATS);
+        categories = rawCats ? JSON.parse(rawCats) : [];
+
+        const rawWords = localStorage.getItem(LOCAL_STORAGE_KEY_WORDS);
+        wordEntries = rawWords ? JSON.parse(rawWords) : [];
+      } catch (err) {
+        console.error("Errore lettura localStorage:", err);
+      }
+    }
+
+    function saveDataToStorage() {
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY_CATS, JSON.stringify(categories));
+        localStorage.setItem(LOCAL_STORAGE_KEY_WORDS, JSON.stringify(wordEntries));
+      } catch (err) {
+        console.error("Errore salvataggio localStorage:", err);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // CREAZIONE NUOVA CATEGORIA (DOCENTE)
+    // -------------------------------------------------------------
+    function handleCreateCategory(e) {
+      e.preventDefault();
+      if (!isTeacher) return;
+
+      const title = document.getElementById("catTitle").value.trim();
+      const desc = document.getElementById("catDesc").value.trim();
+      const rawRes = document.getElementById("catResources").value.trim();
+
+      if (!title) return;
+
+      const newCategory = {
+        id: "cat_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
+        title: title,
+        description: desc,
+        resources: parseResourceInputs(rawRes),
+        createdAt: new Date().toISOString()
+      };
+
+      // ACCODA SENZA SOVRASCRIVERE
+      categories.push(newCategory);
+      saveDataToStorage();
+
+      // Reset Form
+      document.getElementById("catTitle").value = "";
+      document.getElementById("catDesc").value = "";
+      document.getElementById("catResources").value = "";
+
+      renderApp();
+    }
+
+    // Estrazione link e codici embed
+    function parseResourceInputs(text) {
+      if (!text) return [];
+      const items = [];
+      
+      // Se contiene script o blockquote (Codice Embed)
+      if (text.includes("<blockquote") || text.includes("<iframe")) {
+        items.push({ type: "embed", content: text });
+      } else {
+        // Estrazione per URL separati
+        const urls = text.split(/\s+/).filter(u => u.startsWith("http"));
+        urls.forEach(url => {
+          if (url.includes("instagram.com")) {
+            items.push({ type: "instagram", url: url });
+          } else if (url.includes("tiktok.com")) {
+            items.push({ type: "tiktok", url: url });
+          } else if (url.includes("youtube.com") || url.includes("youtu.be")) {
+            items.push({ type: "youtube", url: url });
+          } else {
+            items.push({ type: "generic", url: url });
+          }
+        });
+      }
+      return items;
+    }
+
+    // -------------------------------------------------------------
+    // INSERIMENTO PAROLA STUDENTE
+    // -------------------------------------------------------------
+    function handleWordSubmit(e, categoryId) {
+      e.preventDefault();
+      const input = document.getElementById(`wordInput_${categoryId}`);
+      if (!input) return;
+
+      const rawWord = input.value.trim().toLowerCase();
+      if (!rawWord) return;
+
+      // Pulisce punteggiatura extra
+      const cleanWord = rawWord.replace(/[^\w\u00C0-\u024F]/gi, "");
+      if (!cleanWord) return;
+
+      const entry = {
+        id: "word_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
+        categoryId: categoryId,
+        word: cleanWord,
+        createdAt: new Date().toISOString()
+      };
+
+      wordEntries.push(entry);
+      saveDataToStorage();
+
+      input.value = "";
+      renderCategoryWords(categoryId);
+      
+      // Notifica animata
+      showTemporaryToast("Parola inviata al muro con successo!");
+    }
+
+    // -------------------------------------------------------------
+    // RENDER DELL'APPLICAZIONE
+    // -------------------------------------------------------------
+    function renderApp() {
+      const container = document.getElementById("categoriesContainer");
+      const emptyState = document.getElementById("emptyState");
+
+      if (categories.length === 0) {
+        emptyState.classList.remove("hidden");
+        container.innerHTML = "";
+        return;
+      }
+
+      emptyState.classList.add("hidden");
+      container.innerHTML = "";
+
+      categories.forEach((cat, index) => {
+        const catCard = document.createElement("article");
+        catCard.className = "bg-slate-800/60 border border-slate-700/80 rounded-3xl p-6 sm:p-8 space-y-8 shadow-2xl relative overflow-hidden backdrop-blur-md";
+        
+        catCard.innerHTML = `
+          <!-- Header Categoria -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-700/60 pb-6">
+            <div>
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mb-2">
+                Modulo #${index + 1}
+              </span>
+              <h2 class="text-2xl font-bold text-white">${escapeHtml(cat.title)}</h2>
+              ${cat.description ? `<p class="text-sm text-slate-300 mt-1">${escapeHtml(cat.description)}</p>` : ""}
+            </div>
+
+            ${isTeacher ? `
+              <button onclick="deleteCategory('${cat.id}')" class="self-start sm:self-center inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/30 transition">
+                <i data-lucide="trash-2" class="w-4 h-4"></i> Elimina Categoria
+              </button>
+            ` : ""}
+          </div>
+
+          <!-- SEZIONE 1: RISORSE / MEDIA -->
+          <div class="space-y-3">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="media" class="w-4 h-4 text-indigo-400"></i> Sezione 1: Contenuti da Analizzare
+            </h3>
             
-            onSnapshot(publicColRef, (snapshot) => {
-                const loadedCat = [];
-                snapshot.forEach(docSnap => {
-                    loadedCat.push({ id: docSnap.id, ...docSnap.data() });
-                });
-                // Ordina per data di creazione crescente
-                loadedCat.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-                window.appData.categories = loadedCat;
-                saveToLocalStorage();
-                renderAllCategories();
-            }, (error) => {
-                console.error("Errore sincronizzazione Firestore:", error);
-                document.getElementById('sync-text').innerText = "Modalità Offline";
-                document.getElementById('sync-status').classList.replace('bg-emerald-50', 'bg-amber-50');
-                document.getElementById('sync-status').classList.replace('text-emerald-700', 'text-amber-700');
-            });
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              ${renderResources(cat.resources)}
+            </div>
+          </div>
+
+          <!-- SEZIONE 2: FORM INPUT STUDENTE -->
+          <div class="bg-slate-900/80 border border-slate-700/80 rounded-2xl p-5 sm:p-6 space-y-4">
+            <div class="flex items-center gap-2">
+              <div class="p-2 bg-purple-500/10 text-purple-400 rounded-lg">
+                <i data-lucide="pen-tool" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-white">Sezione 2: La tua descrizione (Anonimo)</h3>
+                <p class="text-xs text-slate-400">Inserisci una parola che descrive i contenuti di questa categoria</p>
+              </div>
+            </div>
+
+            <form onsubmit="handleWordSubmit(event, '${cat.id}')" class="flex flex-col sm:flex-row gap-3">
+              <input type="text" id="wordInput_${cat.id}" required placeholder="Scrivi una parola (es. Emozione, Fake, Trend...)" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-500">
+              <button type="submit" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white transition shadow-lg shadow-purple-600/20">
+                <i data-lucide="send" class="w-4 h-4"></i> Invia Parola
+              </button>
+            </form>
+          </div>
+
+          <!-- SEZIONE 3: MURO DELLE PAROLE REAL-TIME -->
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                <i data-lucide="cloud" class="w-4 h-4 text-emerald-400"></i> Sezione 3: Muro delle Parole della Classe
+              </h3>
+              <span id="wordCountBadge_${cat.id}" class="text-xs text-slate-400 font-medium">0 parole</span>
+            </div>
+
+            <div id="wordCloud_${cat.id}" class="min-h-[140px] bg-slate-900/40 border border-slate-800 rounded-2xl p-6 flex flex-wrap items-center justify-center gap-3">
+              <!-- Parole renderizzate qua -->
+            </div>
+          </div>
+        `;
+
+        container.appendChild(catCard);
+        renderCategoryWords(cat.id);
+      });
+
+      lucide.createIcons();
+      triggerEmbedScriptProcess();
+    }
+
+    // Renderizza le risorse
+    function renderResources(resources) {
+      if (!resources || resources.length === 0) {
+        return `<p class="text-xs text-slate-500 italic col-span-full">Nessun contenuto multimediale allegato a questa categoria.</p>`;
+      }
+
+      return resources.map(res => {
+        if (res.type === "embed") {
+          return `<div class="overflow-hidden rounded-xl border border-slate-700 bg-slate-900 p-2 flex justify-center">${res.content}</div>`;
         }
-
-        // Salva Categoria nel Cloud / Locale
-        window.saveCategoryToDb = async function(categoryObj) {
-            if (db && currentUser) {
-                try {
-                    const catDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'categories', categoryObj.id);
-                    await setDoc(catDocRef, categoryObj);
-                } catch (e) {
-                    console.error("Errore salvataggio categoria su Firestore:", e);
-                }
-            }
-            // Aggiorna stato locale
-            const existingIndex = window.appData.categories.findIndex(c => c.id === categoryObj.id);
-            if (existingIndex >= 0) {
-                window.appData.categories[existingIndex] = categoryObj;
-            } else {
-                window.appData.categories.push(categoryObj);
-            }
-            saveToLocalStorage();
-            renderAllCategories();
-        };
-
-        // Elimina Categoria
-        window.deleteCategoryFromDb = async function(catId) {
-            if (db && currentUser) {
-                try {
-                    const catDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'categories', catId);
-                    await deleteDoc(catDocRef);
-                } catch (e) {
-                    console.error("Errore eliminazione categoria:", e);
-                }
-            }
-            window.appData.categories = window.appData.categories.filter(c => c.id !== catId);
-            saveToLocalStorage();
-            renderAllCategories();
-        };
-
-        // Invia Parola
-        window.addWordToCategoryInDb = async function(catId, word) {
-            const cat = window.appData.categories.find(c => c.id === catId);
-            if (!cat) return;
-
-            const updatedWords = cat.words || {};
-            const cleanWord = word.trim().toLowerCase();
-            if (!cleanWord) return;
-
-            updatedWords[cleanWord] = (updatedWords[cleanWord] || 0) + 1;
-            cat.words = updatedWords;
-
-            if (db && currentUser) {
-                try {
-                    const catDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'categories', catId);
-                    await updateDoc(catDocRef, { words: updatedWords });
-                } catch (e) {
-                    console.error("Errore aggiunta parola Firestore:", e);
-                }
-            } else {
-                saveToLocalStorage();
-                renderAllCategories();
-            }
-        };
-
-        // Resetta Parole
-        window.resetWordsInDb = async function(catId) {
-            const cat = window.appData.categories.find(c => c.id === catId);
-            if (!cat) return;
-            cat.words = {};
-
-            if (db && currentUser) {
-                try {
-                    const catDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'categories', catId);
-                    await updateDoc(catDocRef, { words: {} });
-                } catch (e) {
-                    console.error("Errore reset parole:", e);
-                }
-            } else {
-                saveToLocalStorage();
-                renderAllCategories();
-            }
-        };
-
-        function saveToLocalStorage() {
-            try {
-                localStorage.setItem('wordwall_categories', JSON.stringify(window.appData.categories));
-            } catch (e) {
-                console.warn("Impossibile salvare in localStorage", e);
-            }
+        if (res.type === "youtube") {
+          const videoId = extractYouTubeId(res.url);
+          return `<div class="aspect-video w-full rounded-xl overflow-hidden border border-slate-700 bg-slate-900">
+            <iframe class="w-full h-full" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
+          </div>`;
         }
+        // Schede Link Instagram, TikTok o Generici
+        return `
+          <div class="bg-slate-900 border border-slate-700/80 rounded-xl p-4 flex flex-col justify-between gap-3 hover:border-slate-600 transition">
+            <div class="flex items-center gap-3">
+              <div class="p-2.5 rounded-lg bg-slate-800 text-indigo-400">
+                <i data-lucide="external-link" class="w-5 h-5"></i>
+              </div>
+              <div class="overflow-hidden">
+                <p class="text-xs font-bold text-slate-200 capitalize">${res.type} Link</p>
+                <p class="text-[11px] text-slate-400 truncate">${escapeHtml(res.url)}</p>
+              </div>
+            </div>
+            <a href="${escapeHtml(res.url)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 transition border border-slate-700">
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i> Apri Risorsa
+            </a>
+          </div>
+        `;
+      }).join("");
+    }
 
-        function loadLocalFallback() {
-            try {
-                const stored = localStorage.getItem('wordwall_categories');
-                if (stored) {
-                    window.appData.categories = JSON.parse(stored);
-                }
-            } catch (e) {
-                window.appData.categories = [];
-            }
-            renderAllCategories();
-        }
-    </script>
+    // Renderizza le parole inviate dagli studenti per categoria
+    function renderCategoryWords(categoryId) {
+      const cloud = document.getElementById(`wordCloud_${categoryId}`);
+      const countBadge = document.getElementById(`wordCountBadge_${categoryId}`);
+      if (!cloud) return;
 
-    <!-- Main Application UI Logic -->
-    <script>
-        // Gestione Aggiunta Righe Form Risorse
-        function addResourceRow() {
-            const container = document.getElementById('resources-inputs-container');
-            const row = document.createElement('div');
-            row.className = 'resource-input-row flex flex-col sm:flex-row gap-2 items-start sm:items-center';
-            row.innerHTML = `
-                <select class="res-type bg-slate-50 border border-slate-300 text-slate-700 text-xs rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-36">
-                    <option value="url">Link / URL Web</option>
-                    <option value="instagram">Instagram Post/Reel</option>
-                    <option value="tiktok">TikTok Video</option>
-                    <option value="youtube">YouTube Video</option>
-                    <option value="embed">Codice Embed HTML</option>
-                </select>
-                <textarea placeholder="Incolla URL o Codice Embed HTML qui..." rows="1" class="res-content w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 font-mono text-xs"></textarea>
-                <button type="button" onclick="removeResourceRow(this)" class="text-slate-400 hover:text-red-500 p-2 text-sm self-end sm:self-center">
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
-            `;
-            container.appendChild(row);
-        }
+      const wordsForCat = wordEntries.filter(w => w.categoryId === categoryId);
+      if (countBadge) countBadge.textContent = `${wordsForCat.length} risposte totali`;
 
-        function removeResourceRow(btn) {
-            const container = document.getElementById('resources-inputs-container');
-            if (container.querySelectorAll('.resource-input-row').length > 1) {
-                btn.closest('.resource-input-row').remove();
-            } else {
-                // Se è l'ultima riga pulisce solo il contenuto
-                const textarea = btn.closest('.resource-input-row').querySelector('.res-content');
-                if (textarea) textarea.value = '';
-            }
-        }
+      if (wordsForCat.length === 0) {
+        cloud.innerHTML = `<p class="text-xs text-slate-500 italic">In attesa dei contributi degli studenti...</p>`;
+        return;
+      }
 
-        // Creazione Nuova Categoria
-        function handleCreateCategory(event) {
-            event.preventDefault();
+      // Conteggio Frequenze
+      const freqMap = {};
+      wordsForCat.forEach(w => {
+        const word = w.word.toUpperCase();
+        freqMap[word] = (freqMap[word] || 0) + 1;
+      });
 
-            const title = document.getElementById('cat-title').value.trim();
-            const description = document.getElementById('cat-desc').value.trim();
+      cloud.innerHTML = Object.entries(freqMap).map(([word, count]) => {
+        // Calcolo dinamico della dimensione del testo in base alla frequenza
+        const sizeClass = count > 5 ? "text-2xl font-black text-amber-400" :
+                          count > 3 ? "text-xl font-bold text-indigo-300" :
+                          count > 1 ? "text-base font-semibold text-purple-300" :
+                                      "text-sm font-medium text-slate-300";
 
-            const resourceRows = document.querySelectorAll('.resource-input-row');
-            const resources = [];
+        return `
+          <span class="animate-float inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 border border-slate-700 shadow-md ${sizeClass}">
+            ${escapeHtml(word)}
+            ${count > 1 ? `<span class="text-[10px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded-full font-sans">${count}</span>` : ""}
+          </span>
+        `;
+      }).join("");
+    }
 
-            resourceRows.forEach(row => {
-                const type = row.querySelector('.res-type').value;
-                const content = row.querySelector('.res-content').value.trim();
-                if (content) {
-                    resources.push({ type, content });
-                }
-            });
+    // Eliminazione Categoria (Docente)
+    function deleteCategory(categoryId) {
+      if (!isTeacher) return;
+      if (confirm("Sei sicuro di voler eliminare questa categoria e le sue parole?")) {
+        categories = categories.filter(c => c.id !== categoryId);
+        wordEntries = wordEntries.filter(w => w.categoryId !== categoryId);
+        saveDataToStorage();
+        renderApp();
+      }
+    }
 
-            if (!title || !description) return;
+    // Reset Totale (Docente)
+    function confirmResetAll() {
+      if (!isTeacher) return;
+      if (confirm("ATTENZIONE: Verranno cancellate TUTTE le categorie e le risposte della classe! Continuare?")) {
+        categories = [];
+        wordEntries = [];
+        saveDataToStorage();
+        renderApp();
+      }
+    }
 
-            const newCategory = {
-                id: 'cat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-                title: title,
-                description: description,
-                resources: resources,
-                words: {},
-                createdAt: Date.now()
-            };
+    // Esportazione CSV
+    function exportWordsCSV() {
+      if (wordEntries.length === 0) {
+        alert("Nessun dato da esportare.");
+        return;
+      }
 
-            // Salva cumulativamente senza sovrascrivere
-            window.saveCategoryToDb(newCategory);
+      let csvContent = "data:text/csv;charset=utf-8,Categoria,Parola,Data\n";
+      wordEntries.forEach(w => {
+        const cat = categories.find(c => c.id === w.categoryId);
+        const catTitle = cat ? cat.title.replace(/,/g, " ") : "Generica";
+        csvContent += `"${catTitle}","${w.word}","${w.createdAt}"\n`;
+      });
 
-            // Resetta form
-            document.getElementById('create-category-form').reset();
-            document.getElementById('resources-inputs-container').innerHTML = `
-                <div class="resource-input-row flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-                    <select class="res-type bg-slate-50 border border-slate-300 text-slate-700 text-xs rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-36">
-                        <option value="url">Link / URL Web</option>
-                        <option value="instagram">Instagram Post/Reel</option>
-                        <option value="tiktok">TikTok Video</option>
-                        <option value="youtube">YouTube Video</option>
-                        <option value="embed">Codice Embed HTML</option>
-                    </select>
-                    <textarea placeholder="Incolla URL o Codice Embed HTML qui..." rows="1" class="res-content w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 font-mono text-xs"></textarea>
-                    <button type="button" onclick="removeResourceRow(this)" class="text-slate-400 hover:text-red-500 p-2 text-sm self-end sm:self-center">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
-                </div>
-            `;
-        }
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `report_parole_classe_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
 
-        // Invio Parola da parte degli Studenti
-        function handleWordSubmit(event, catId) {
-            event.preventDefault();
-            const input = document.getElementById(`word-input-${catId}`);
-            if (!input) return;
-            const word = input.value.trim();
-            if (word) {
-                window.addWordToCategoryInDb(catId, word);
-                input.value = '';
-            }
-        }
+    // Helper Utilità
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+      }[m]));
+    }
 
-        // Toggle Modalità Docente
-        function toggleTeacherMode() {
-            window.appData.isTeacherMode = !window.appData.isTeacherMode;
-            const btn = document.getElementById('teacher-toggle-btn');
-            const text = document.getElementById('teacher-btn-text');
+    function extractYouTubeId(url) {
+      const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+      return match ? match[1] : "";
+    }
 
-            if (window.appData.isTeacherMode) {
-                btn.classList.replace('bg-slate-800', 'bg-amber-600');
-                text.innerText = "Modalità Docente Attiva";
-            } else {
-                btn.classList.replace('bg-amber-600', 'bg-slate-800');
-                text.innerText = "Pannello Docente";
-            }
-            renderAllCategories();
-        }
+    function triggerEmbedScriptProcess() {
+      if (window.instgrm && window.instgrm.Embeds) {
+        window.instgrm.Embeds.process();
+      }
+    }
 
-        // Renderizzazione Completa Categorie
-        function renderAllCategories() {
-            const container = document.getElementById('categories-container');
-            const emptyState = document.getElementById('empty-state');
-            const categories = window.appData.categories || [];
-
-            if (categories.length === 0) {
-                emptyState.classList.remove('hidden');
-                container.innerHTML = '';
-                return;
-            } else {
-                emptyState.classList.add('hidden');
-            }
-
-            container.innerHTML = categories.map(cat => renderCategoryCard(cat)).join('');
-
-            // Processa Script Social Embeds
-            setTimeout(() => {
-                if (window.instgrm && window.instgrm.Embeds) {
-                    window.instgrm.Embeds.process();
-                }
-            }, 300);
-        }
-
-        // Generazione Singolo Blocco Sezione con le 3 Sotto-Sezioni
-        function renderCategoryCard(cat) {
-            const isTeacher = window.appData.isTeacherMode;
-
-            return `
-                <article class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col transition hover:shadow-md">
-                    <!-- HEADER CATEGORIA -->
-                    <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div class="space-y-1">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-indigo-300 bg-indigo-900/50 px-2.5 py-1 rounded-md border border-indigo-700/50">Sezione Didattica</span>
-                            <h3 class="font-display font-bold text-2xl text-white leading-tight">${escapeHtml(cat.title)}</h3>
-                            <p class="text-sm text-slate-300 pt-1">${escapeHtml(cat.description)}</p>
-                        </div>
-
-                        ${isTeacher ? `
-                            <div class="flex items-center space-x-2 bg-slate-800/80 p-2 rounded-xl border border-slate-700 self-start md:self-auto">
-                                <button onclick="exportWordsCSV('${cat.id}')" title="Esporta Parole CSV" class="p-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg text-xs flex items-center space-x-1">
-                                    <i class="fa-solid fa-file-csv text-emerald-400"></i>
-                                    <span>CSV</span>
-                                </button>
-                                <button onclick="window.resetWordsInDb('${cat.id}')" title="Azzera Muro Parole" class="p-2 text-slate-300 hover:text-amber-400 hover:bg-slate-700 rounded-lg text-xs flex items-center space-x-1">
-                                    <i class="fa-solid fa-rotate-left"></i>
-                                    <span>Reset</span>
-                                </button>
-                                <button onclick="window.deleteCategoryFromDb('${cat.id}')" title="Elimina Categoria" class="p-2 text-slate-300 hover:text-red-400 hover:bg-slate-700 rounded-lg text-xs flex items-center space-x-1">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            </div>
-                        ` : ''}
-                    </div>
-
-                    <div class="p-6 sm:p-8 space-y-10">
-                        <!-- SOTTO-SEZIONE 1: RISORSE SOCIAL & WEB -->
-                        <section class="space-y-4">
-                            <div class="flex items-center space-x-2 border-b border-slate-100 pb-3">
-                                <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 text-xs font-bold flex items-center justify-center">1</span>
-                                <h4 class="font-display font-bold text-slate-800 text-lg">Post, Reel & Risorse da Analizzare</h4>
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
-                                ${(cat.resources && cat.resources.length > 0) 
-                                    ? cat.resources.map(res => renderResourceCard(res)).join('') 
-                                    : '<p class="text-sm text-slate-400 italic col-span-full">Nessuna risorsa allegata a questa categoria.</p>'
-                                }
-                            </div>
-                        </section>
-
-                        <!-- SOTTO-SEZIONE 2: INPUT PAROLA DEGLI STUDENTI -->
-                        <section class="bg-indigo-50/60 border border-indigo-100 rounded-2xl p-6 space-y-4">
-                            <div class="flex items-center space-x-2">
-                                <span class="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center">2</span>
-                                <h4 class="font-display font-bold text-slate-800 text-lg">Invia la tua Parola / Impressione</h4>
-                            </div>
-
-                            <form onsubmit="handleWordSubmit(event, '${cat.id}')" class="flex flex-col sm:flex-row gap-3">
-                                <input type="text" id="word-input-${cat.id}" required placeholder="Scrivi una parola o breve concetto..." 
-                                       class="flex-grow px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm shadow-sm bg-white">
-                                <button type="submit" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-md transition flex items-center justify-center space-x-2 shrink-0">
-                                    <i class="fa-solid fa-paper-plane"></i>
-                                    <span>Invia al Muro</span>
-                                </button>
-                            </form>
-                        </section>
-
-                        <!-- SOTTO-SEZIONE 3: MURO / NUVOLA DELLE PAROLE -->
-                        <section class="space-y-4">
-                            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                                <div class="flex items-center space-x-2">
-                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 text-xs font-bold flex items-center justify-center">3</span>
-                                    <h4 class="font-display font-bold text-slate-800 text-lg">Muro delle Parole Real-Time</h4>
-                                </div>
-                                <span class="text-xs font-semibold bg-slate-100 text-slate-600 px-3 py-1 rounded-full">
-                                    Totale invii: ${getTotalWordCount(cat.words)}
-                                </span>
-                            </div>
-
-                            <div class="min-h-[160px] p-6 bg-slate-50 border border-slate-200/80 rounded-2xl flex flex-wrap items-center justify-center gap-3">
-                                ${renderWordCloud(cat.words)}
-                            </div>
-                        </section>
-                    </div>
-                </article>
-            `;
-        }
-
-        // Rendering intelligente delle risorse web/social
-        function renderResourceCard(res) {
-            const content = res.content.trim();
-
-            if (res.type === 'embed') {
-                return `<div class="bg-white border border-slate-200 rounded-xl p-3 shadow-sm overflow-hidden text-center">${content}</div>`;
-            }
-
-            // YouTube Video
-            if (res.type === 'youtube' || content.includes('youtube.com') || content.includes('youtu.be')) {
-                const ytId = extractYouTubeId(content);
-                if (ytId) {
-                    return `
-                        <div class="aspect-video w-full rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-black">
-                            <iframe class="w-full h-full" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen></iframe>
-                        </div>
-                    `;
-                }
-            }
-
-            // Instagram (URL o HTML Embed)
-            if (res.type === 'instagram' || content.includes('instagram.com')) {
-                if (content.startsWith('<blockquote')) {
-                    return `<div class="flex justify-center overflow-hidden">${content}</div>`;
-                }
-                return `
-                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-3">
-                        <div class="flex items-center space-x-2 text-pink-600 font-semibold text-xs">
-                            <i class="fa-brands fa-instagram text-base"></i>
-                            <span>Instagram Post/Reel</span>
-                        </div>
-                        <p class="text-xs text-slate-500 truncate">${escapeHtml(content)}</p>
-                        <a href="${escapeHtml(content)}" target="_blank" rel="noopener" class="inline-flex items-center space-x-1 text-xs bg-pink-50 hover:bg-pink-100 text-pink-700 font-medium px-3 py-2 rounded-lg transition w-full justify-center">
-                            <span>Visualizza Risorsa Instagram</span>
-                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-                        </a>
-                    </div>
-                `;
-            }
-
-            // TikTok (URL o HTML Embed)
-            if (res.type === 'tiktok' || content.includes('tiktok.com')) {
-                if (content.startsWith('<blockquote')) {
-                    return `<div class="flex justify-center overflow-hidden">${content}</div>`;
-                }
-                return `
-                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-3">
-                        <div class="flex items-center space-x-2 text-slate-900 font-semibold text-xs">
-                            <i class="fa-brands fa-tiktok text-base"></i>
-                            <span>TikTok Video</span>
-                        </div>
-                        <p class="text-xs text-slate-500 truncate">${escapeHtml(content)}</p>
-                        <a href="${escapeHtml(content)}" target="_blank" rel="noopener" class="inline-flex items-center space-x-1 text-xs bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium px-3 py-2 rounded-lg transition w-full justify-center">
-                            <span>Apri Video TikTok</span>
-                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-                        </a>
-                    </div>
-                `;
-            }
-
-            // Generic Link Card
-            return `
-                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-3">
-                    <div class="flex items-center space-x-2 text-indigo-600 font-semibold text-xs">
-                        <i class="fa-solid fa-globe text-base"></i>
-                        <span>Risorsa Web / Articolo</span>
-                    </div>
-                    <p class="text-xs text-slate-600 line-clamp-2 font-mono break-all">${escapeHtml(content)}</p>
-                    <a href="${escapeHtml(content)}" target="_blank" rel="noopener" class="inline-flex items-center space-x-1.5 text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium px-3 py-2 rounded-lg transition w-full justify-center">
-                        <span>Apri Collegamento Esterno</span>
-                        <i class="fa-solid fa-external-link text-[10px]"></i>
-                    </a>
-                </div>
-            `;
-        }
-
-        // Render Nuvola / Muro delle parole
-        function renderWordCloud(wordsObj) {
-            if (!wordsObj || Object.keys(wordsObj).length === 0) {
-                return `<p class="text-xs text-slate-400 italic">Ancora nessuna parola inviata per questa sezione. Sii il primo!</p>`;
-            }
-
-            const entries = Object.entries(wordsObj);
-            const maxFreq = Math.max(...entries.map(([_, f]) => f), 1);
-
-            // Palette di colori vibranti per le bolle
-            const colorPalettes = [
-                'bg-indigo-600 text-white shadow-indigo-200',
-                'bg-purple-600 text-white shadow-purple-200',
-                'bg-pink-500 text-white shadow-pink-200',
-                'bg-blue-600 text-white shadow-blue-200',
-                'bg-teal-600 text-white shadow-teal-200',
-                'bg-amber-500 text-white shadow-amber-200'
-            ];
-
-            return entries.map(([word, freq], idx) => {
-                // Calcola dimensione font proporzionale alla frequenza
-                const scale = 0.85 + (freq / maxFreq) * 0.75; // tra 0.85em e 1.6em
-                const palette = colorPalettes[idx % colorPalettes.length];
-
-                return `
-                    <div class="word-bubble flex items-center space-x-2 px-4 py-2 rounded-2xl ${palette} shadow-md font-medium" style="font-size: ${scale}rem;">
-                        <span>${escapeHtml(word)}</span>
-                        <span class="text-[10px] bg-white/20 backdrop-blur-md px-2 py-0.5 rounded-full font-bold">${freq}</span>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Helper Utility Functions
-        function getTotalWordCount(wordsObj) {
-            if (!wordsObj) return 0;
-            return Object.values(wordsObj).reduce((a, b) => a + b, 0);
-        }
-
-        function extractYouTubeId(url) {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : null;
-        }
-
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-        }
-
-        function exportWordsCSV(catId) {
-            const cat = window.appData.categories.find(c => c.id === catId);
-            if (!cat || !cat.words) return;
-
-            let csvContent = "data:text/csv;charset=utf-8,Parola,Frequenza\n";
-            Object.entries(cat.words).forEach(([word, freq]) => {
-                csvContent += `"${word}",${freq}\n`;
-            });
-
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `wordwall_${cat.title.toLowerCase().replace(/\s+/g, '_')}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
-    </script>
+    function showTemporaryToast(msg) {
+      const toast = document.createElement("div");
+      toast.className = "fixed bottom-5 right-5 z-50 bg-emerald-500 text-slate-950 px-4 py-2.5 rounded-xl font-bold text-xs shadow-2xl transition-all";
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2500);
+    }
+  </script>
+  <!-- Script Instagram Embed Ufficiale -->
+  <script async src="//www.instagram.com/embed.js"></script>
 </body>
 </html>
