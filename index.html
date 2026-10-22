@@ -13,19 +13,41 @@
       0%, 100% { transform: translateY(0px) scale(1); }
       50% { transform: translateY(-6px) scale(1.03); }
     }
-    .animate-float {
-      animation: floatBubble 4s ease-in-out infinite;
-    }
-    /* Estetica scrollbar */
+    .animate-float { animation: floatBubble 4s ease-in-out infinite; }
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: #0f172a; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #475569; }
   </style>
-</head>
-<body class="min-h-full flex flex-col font-sans antialiased bg-slate-900 text-slate-100 selection:bg-indigo-500 selection:text-white">
 
-  <!-- HEADER / BARRA SUPERIORE -->
+  <!-- Firebase SDK (v10) per Sincronizzazione Real-Time -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // =========================================================================
+    // ⚠️ SOSTITUISCI QUESTA SEZIONE CON I TUOI DATI DI FIREBASE
+    // =========================================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyBoZnEHxc_bBRdP84fJJyrfTd8r3jYjL6E",
+  authDomain: "autogestione-10-26.firebaseapp.com",
+  projectId: "autogestione-10-26",
+  storageBucket: "autogestione-10-26.firebasestorage.app",
+  messagingSenderId: "348550005255",
+  appId: "1:348550005255:web:c25572e28337633bdb20a2",
+  measurementId: "G-LQYHDLHBHQ"
+};
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Riferimenti globali al DB
+    window.db = db;
+    window.fbMethods = { collection, onSnapshot, addDoc, deleteDoc, doc, getDocs };
+  </script>
+</head>
+<body class="min-h-full flex flex-col font-sans bg-slate-900 text-slate-100">
+
+  <!-- HEADER -->
   <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -33,22 +55,18 @@
           <i data-lucide="sparkles" class="w-6 h-6"></i>
         </div>
         <div>
-          <h1 class="text-lg font-bold bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-            Social Analysis & Word Cloud
-          </h1>
-          <p class="text-xs text-slate-400 hidden sm:block">Laboratorio di Analisi Critica dei Contenuti Digitali</p>
+          <h1 class="text-lg font-bold text-white">Social Analysis & Word Cloud</h1>
+          <p class="text-xs text-slate-400 hidden sm:block">Laboratorio Interattivo Real-Time</p>
         </div>
       </div>
 
       <div class="flex items-center gap-2">
-        <!-- Badge Stato Connessione -->
-        <span id="connectionBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          Connesso
+          Live Cloud
         </span>
 
-        <!-- Tasto Login / Toggle Docente -->
-        <button id="btnTeacherToggle" onclick="toggleTeacherMode()" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
+        <button onclick="toggleTeacherMode()" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
           <i id="teacherIcon" data-lucide="lock" class="w-4 h-4 text-amber-400"></i>
           <span id="teacherStatusText">Modalità Docente</span>
         </button>
@@ -59,13 +77,11 @@
   <!-- CONTENUTO PRINCIPALE -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
 
-    <!-- BARRA STRUMENTI DOCENTE (Visibile solo in modalità docente sbloccata) -->
-    <section id="teacherToolbar" class="hidden bg-slate-800/80 border border-amber-500/30 rounded-2xl p-6 shadow-xl backdrop-blur-sm relative overflow-hidden">
-      <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
-      
+    <!-- PANNELLO DOCENTE (PROTETTO) -->
+    <section id="teacherToolbar" class="hidden bg-slate-800/80 border border-amber-500/30 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-700/60">
         <div class="flex items-center gap-3">
-          <div class="p-2 bg-amber-500/10 rounded-lg text-amber-400 border border-amber-500/20">
+          <div class="p-2 bg-amber-500/10 text-amber-400 rounded-lg border border-amber-500/20">
             <i data-lucide="shield-check" class="w-5 h-5"></i>
           </div>
           <div>
@@ -74,164 +90,106 @@
           </div>
         </div>
 
-        <div class="flex items-center gap-2 flex-wrap">
-          <button onclick="exportWordsCSV()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600 transition">
-            <i data-lucide="download" class="w-4 h-4"></i>
-            Esporta Dati (CSV)
+        <div class="flex items-center gap-2">
+          <button onclick="exportWordsCSV()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-700 hover:bg-slate-600 text-slate-200 transition">
+            Esporta CSV
           </button>
-          <button onclick="confirmResetAll()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 transition">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
-            Resetta Tutto
+          <button onclick="confirmResetAll()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/10 text-rose-300 border border-rose-500/30 hover:bg-rose-500/20 transition">
+            Resetta Cloud
           </button>
-          <button onclick="lockTeacherMode()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition">
-            <i data-lucide="lock" class="w-4 h-4"></i>
-            Blocca Sessione
+          <button onclick="lockTeacherMode()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition">
+            Blocca
           </button>
         </div>
       </div>
 
-      <!-- Form Nuova Categoria -->
-      <form id="formNewCategory" onsubmit="handleCreateCategory(event)" class="space-y-4">
-        <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
-          <i data-lucide="folder-plus" class="w-4 h-4 text-indigo-400"></i>
-          Aggiungi Nuova Categoria / Modulo di Analisi
-        </h3>
-        
+      <form onsubmit="handleCreateCategory(event)" class="space-y-4">
+        <h3 class="text-sm font-semibold text-slate-200">Aggiungi Nuova Categoria</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1">Titolo Categoria *</label>
-            <input type="text" id="catTitle" required placeholder="Es. Comunicazione Politica, Fake News, Marketing..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1">Descrizione / Istruzioni per gli Studenti</label>
-            <input type="text" id="catDesc" placeholder="Es. Osserva i post sottostanti e indica le parole chiave..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
-          </div>
+          <input type="text" id="catTitle" required placeholder="Titolo Categoria *" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+          <input type="text" id="catDesc" placeholder="Descrizione o domande per gli studenti" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
         </div>
-
-        <div>
-          <label class="block text-xs font-medium text-slate-400 mb-1">Incolla Codici Embed o URL (Instagram, TikTok, YouTube, Web)</label>
-          <textarea id="catResources" rows="3" placeholder="Incolla qui l'embed di Instagram/TikTok oppure URL diretti (uno per riga o separati da spazio)..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500"></textarea>
-          <p class="text-[11px] text-slate-500 mt-1">Puoi incollare il codice Embed completo fornito da Instagram/TikTok oppure semplici link.</p>
-        </div>
-
-        <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-md shadow-indigo-600/30">
-          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+        <textarea id="catResources" rows="2" placeholder="Incolla qui l'embed di Instagram/TikTok o link YouTube/Web..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"></textarea>
+        <button type="submit" class="px-4 py-2 rounded-lg text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition">
           Crea Categoria
         </button>
       </form>
     </section>
 
-    <!-- STATO VUOTO (Se non ci sono ancora categorie) -->
+    <!-- STATO VUOTO -->
     <div id="emptyState" class="text-center py-16 bg-slate-800/40 border border-dashed border-slate-700 rounded-2xl p-8">
-      <div class="inline-flex p-4 rounded-full bg-slate-800 text-slate-500 mb-4">
-        <i data-lucide="layout-grid" class="w-10 h-10"></i>
-      </div>
-      <h3 class="text-lg font-bold text-slate-300 mb-1">Nessuna Categoria Presente</h3>
-      <p class="text-sm text-slate-400 max-w-md mx-auto mb-6">
-        Il docente non ha ancora attivato moduli di analisi. Se sei il docente, clicca in alto su <strong>"Modalità Docente"</strong> per aggiungere la prima categoria.
-      </p>
+      <i data-lucide="layout-grid" class="w-10 h-10 text-slate-500 mx-auto mb-3"></i>
+      <h3 class="text-lg font-bold text-slate-300 mb-1">In Attesa dell'Attività</h3>
+      <p class="text-sm text-slate-400">Il docente deve ancora aggiungere la prima categoria di analisi.</p>
     </div>
 
-    <!-- CONTENITORE DINAMICO DELLE CATEGORIE -->
-    <div id="categoriesContainer" class="space-y-16">
-      <!-- Le categorie verranno caricate dinamicamente qui -->
-    </div>
+    <!-- CATEGORIE E PAROLE -->
+    <div id="categoriesContainer" class="space-y-16"></div>
 
   </main>
 
-  <!-- MODALE AUTENTICAZIONE DOCENTE -->
+  <!-- MODALE PASSWORD -->
   <div id="passwordModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
-      <div class="flex items-center gap-3 mb-4">
-        <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20">
-          <i data-lucide="lock" class="w-6 h-6"></i>
-        </div>
-        <div>
-          <h3 class="text-lg font-bold text-white">Accesso Riservato Docente</h3>
-          <p class="text-xs text-slate-400">Inserisci la password per gestire l'attività</p>
-        </div>
-      </div>
-
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+      <h3 class="text-lg font-bold text-white mb-2">Accesso Docente</h3>
       <form onsubmit="handlePasswordSubmit(event)" class="space-y-4">
-        <div>
-          <input type="password" id="inputTeacherPassword" required placeholder="Inserisci password..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
-          <p id="passwordError" class="text-xs text-rose-400 mt-1.5 hidden flex items-center gap-1">
-            <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> Password errata. Riprova.
-          </p>
-        </div>
-
-        <div class="flex items-center justify-end gap-2 pt-2">
-          <button type="button" onclick="closePasswordModal()" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">Annulla</button>
-          <button type="submit" class="px-4 py-2 rounded-lg text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 transition font-bold">
-            Sblocca Accesso
-          </button>
+        <input type="password" id="inputTeacherPassword" required placeholder="Inserisci password..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+        <p id="passwordError" class="text-xs text-rose-400 hidden">Password errata. Riprova.</p>
+        <div class="flex justify-end gap-2">
+          <button type="button" onclick="closePasswordModal()" class="px-4 py-2 text-xs text-slate-400">Annulla</button>
+          <button type="submit" class="px-4 py-2 text-xs font-bold bg-amber-500 text-slate-950 rounded-lg">Sblocca</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- JAVASCRIPT LOGIC -->
   <script>
-    // -------------------------------------------------------------
-    // COSTANTI & CONFIGURAZIONE
-    // -------------------------------------------------------------
     const TEACHER_PASSWORD_HASH = "e0e15db7ea2b7246473edffbe901763aa5391262d08a9c33cd5eb0ca20ad9eb2";
-    
-    const LOCAL_STORAGE_KEY_CATS = "app_social_categories_v1";
-    const LOCAL_STORAGE_KEY_WORDS = "app_social_words_v1";
-    const LOCAL_STORAGE_KEY_AUTH = "app_social_is_teacher";
-
     let isTeacher = false;
     let categories = [];
     let wordEntries = [];
 
-    // -------------------------------------------------------------
-    // INIZIALIZZAZIONE
-    // -------------------------------------------------------------
     document.addEventListener("DOMContentLoaded", () => {
       lucide.createIcons();
-      checkSavedAuth();
-      loadDataFromStorage();
-      renderApp();
-
-      // Listener sincronizzazione multi-scheda locale
-      window.addEventListener("storage", (e) => {
-        if (e.key === LOCAL_STORAGE_KEY_CATS || e.key === LOCAL_STORAGE_KEY_WORDS) {
-          loadDataFromStorage();
-          renderApp();
-        }
-      });
+      initFirebaseListeners();
     });
 
-    // Cifratura Password via Web Crypto API (SHA-256)
     async function hashPassword(str) {
       const buf = new TextEncoder().encode(str);
       const hashBuf = await crypto.subtle.digest("SHA-256", buf);
-      const hashArray = Array.from(new Uint8Array(hashBuf));
-      return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+      return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, "0")).join("");
     }
 
-    // -------------------------------------------------------------
-    // GESTIONE AUTENTICAZIONE DOCENTE
-    // -------------------------------------------------------------
-    function checkSavedAuth() {
-      isTeacher = localStorage.getItem(LOCAL_STORAGE_KEY_AUTH) === "true";
-      updateTeacherUI();
+    function initFirebaseListeners() {
+      // Inizializza l'ascolto real-time quando Firebase è pronto
+      const checkFB = setInterval(() => {
+        if (window.db && window.fbMethods) {
+          clearInterval(checkFB);
+          const { collection, onSnapshot } = window.fbMethods;
+
+          // Ascolta Categorie in tempo reale da tutti i dispositivi
+          onSnapshot(collection(window.db, "categories"), (snapshot) => {
+            categories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderApp();
+          });
+
+          // Ascolta Parole in tempo reale da tutti i dispositivi
+          onSnapshot(collection(window.db, "words"), (snapshot) => {
+            wordEntries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            categories.forEach(c => renderCategoryWords(c.id));
+          });
+        }
+      }, 100);
     }
 
     function toggleTeacherMode() {
-      if (isTeacher) {
-        lockTeacherMode();
-      } else {
-        openPasswordModal();
-      }
+      if (isTeacher) lockTeacherMode(); else openPasswordModal();
     }
 
     function openPasswordModal() {
       document.getElementById("passwordError").classList.add("hidden");
       document.getElementById("inputTeacherPassword").value = "";
       document.getElementById("passwordModal").classList.remove("hidden");
-      document.getElementById("inputTeacherPassword").focus();
     }
 
     function closePasswordModal() {
@@ -241,11 +199,8 @@
     async function handlePasswordSubmit(e) {
       e.preventDefault();
       const pwd = document.getElementById("inputTeacherPassword").value.trim();
-      const hashedInput = await hashPassword(pwd);
-
-      if (hashedInput === TEACHER_PASSWORD_HASH) {
+      if ((await hashPassword(pwd)) === TEACHER_PASSWORD_HASH) {
         isTeacher = true;
-        localStorage.setItem(LOCAL_STORAGE_KEY_AUTH, "true");
         closePasswordModal();
         updateTeacherUI();
       } else {
@@ -255,7 +210,6 @@
 
     function lockTeacherMode() {
       isTeacher = false;
-      localStorage.setItem(LOCAL_STORAGE_KEY_AUTH, "false");
       updateTeacherUI();
     }
 
@@ -268,7 +222,7 @@
         toolbar.classList.remove("hidden");
         icon.setAttribute("data-lucide", "unlock");
         icon.className = "w-4 h-4 text-emerald-400";
-        text.textContent = "Modalità Docente Attiva";
+        text.textContent = "Docente Attivo";
       } else {
         toolbar.classList.add("hidden");
         icon.setAttribute("data-lucide", "lock");
@@ -276,37 +230,10 @@
         text.textContent = "Modalità Docente";
       }
       lucide.createIcons();
-      renderApp(); // Riesegue il render per mostrare/nascondere eventuali controlli docente sulle categorie
+      renderApp();
     }
 
-    // -------------------------------------------------------------
-    // CARICAMENTO & SALVATAGGIO DATI
-    // -------------------------------------------------------------
-    function loadDataFromStorage() {
-      try {
-        const rawCats = localStorage.getItem(LOCAL_STORAGE_KEY_CATS);
-        categories = rawCats ? JSON.parse(rawCats) : [];
-
-        const rawWords = localStorage.getItem(LOCAL_STORAGE_KEY_WORDS);
-        wordEntries = rawWords ? JSON.parse(rawWords) : [];
-      } catch (err) {
-        console.error("Errore lettura localStorage:", err);
-      }
-    }
-
-    function saveDataToStorage() {
-      try {
-        localStorage.setItem(LOCAL_STORAGE_KEY_CATS, JSON.stringify(categories));
-        localStorage.setItem(LOCAL_STORAGE_KEY_WORDS, JSON.stringify(wordEntries));
-      } catch (err) {
-        console.error("Errore salvataggio localStorage:", err);
-      }
-    }
-
-    // -------------------------------------------------------------
-    // CREAZIONE NUOVA CATEGORIA (DOCENTE)
-    // -------------------------------------------------------------
-    function handleCreateCategory(e) {
+    async function handleCreateCategory(e) {
       e.preventDefault();
       if (!isTeacher) return;
 
@@ -316,87 +243,53 @@
 
       if (!title) return;
 
-      const newCategory = {
-        id: "cat_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
+      const newCat = {
         title: title,
         description: desc,
         resources: parseResourceInputs(rawRes),
         createdAt: new Date().toISOString()
       };
 
-      // ACCODA SENZA SOVRASCRIVERE
-      categories.push(newCategory);
-      saveDataToStorage();
+      const { collection, addDoc } = window.fbMethods;
+      await addDoc(collection(window.db, "categories"), newCat);
 
-      // Reset Form
       document.getElementById("catTitle").value = "";
       document.getElementById("catDesc").value = "";
       document.getElementById("catResources").value = "";
-
-      renderApp();
     }
 
-    // Estrazione link e codici embed
     function parseResourceInputs(text) {
       if (!text) return [];
       const items = [];
-      
-      // Se contiene script o blockquote (Codice Embed)
       if (text.includes("<blockquote") || text.includes("<iframe")) {
         items.push({ type: "embed", content: text });
       } else {
-        // Estrazione per URL separati
-        const urls = text.split(/\s+/).filter(u => u.startsWith("http"));
-        urls.forEach(url => {
-          if (url.includes("instagram.com")) {
-            items.push({ type: "instagram", url: url });
-          } else if (url.includes("tiktok.com")) {
-            items.push({ type: "tiktok", url: url });
-          } else if (url.includes("youtube.com") || url.includes("youtu.be")) {
-            items.push({ type: "youtube", url: url });
-          } else {
-            items.push({ type: "generic", url: url });
-          }
+        text.split(/\s+/).filter(u => u.startsWith("http")).forEach(url => {
+          if (url.includes("youtube.com") || url.includes("youtu.be")) items.push({ type: "youtube", url });
+          else items.push({ type: "link", url });
         });
       }
       return items;
     }
 
-    // -------------------------------------------------------------
-    // INSERIMENTO PAROLA STUDENTE
-    // -------------------------------------------------------------
-    function handleWordSubmit(e, categoryId) {
+    async function handleWordSubmit(e, categoryId) {
       e.preventDefault();
       const input = document.getElementById(`wordInput_${categoryId}`);
       if (!input) return;
 
-      const rawWord = input.value.trim().toLowerCase();
-      if (!rawWord) return;
+      const raw = input.value.trim().toLowerCase().replace(/[^\w\u00C0-\u024F]/gi, "");
+      if (!raw) return;
 
-      // Pulisce punteggiatura extra
-      const cleanWord = rawWord.replace(/[^\w\u00C0-\u024F]/gi, "");
-      if (!cleanWord) return;
-
-      const entry = {
-        id: "word_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
+      const { collection, addDoc } = window.fbMethods;
+      await addDoc(collection(window.db, "words"), {
         categoryId: categoryId,
-        word: cleanWord,
+        word: raw,
         createdAt: new Date().toISOString()
-      };
-
-      wordEntries.push(entry);
-      saveDataToStorage();
+      });
 
       input.value = "";
-      renderCategoryWords(categoryId);
-      
-      // Notifica animata
-      showTemporaryToast("Parola inviata al muro con successo!");
     }
 
-    // -------------------------------------------------------------
-    // RENDER DELL'APPLICAZIONE
-    // -------------------------------------------------------------
     function renderApp() {
       const container = document.getElementById("categoriesContainer");
       const emptyState = document.getElementById("emptyState");
@@ -415,66 +308,41 @@
         catCard.className = "bg-slate-800/60 border border-slate-700/80 rounded-3xl p-6 sm:p-8 space-y-8 shadow-2xl relative overflow-hidden backdrop-blur-md";
         
         catCard.innerHTML = `
-          <!-- Header Categoria -->
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-700/60 pb-6">
             <div>
-              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mb-2">
-                Modulo #${index + 1}
-              </span>
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mb-2">Modulo #${index + 1}</span>
               <h2 class="text-2xl font-bold text-white">${escapeHtml(cat.title)}</h2>
               ${cat.description ? `<p class="text-sm text-slate-300 mt-1">${escapeHtml(cat.description)}</p>` : ""}
             </div>
-
-            ${isTeacher ? `
-              <button onclick="deleteCategory('${cat.id}')" class="self-start sm:self-center inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/30 transition">
-                <i data-lucide="trash-2" class="w-4 h-4"></i> Elimina Categoria
-              </button>
-            ` : ""}
+            ${isTeacher ? `<button onclick="deleteCategory('${cat.id}')" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/30">Elimina Modulo</button>` : ""}
           </div>
 
-          <!-- SEZIONE 1: RISORSE / MEDIA -->
+          <!-- SEZIONE 1: POST / MEDIA -->
           <div class="space-y-3">
             <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-              <i data-lucide="media" class="w-4 h-4 text-indigo-400"></i> Sezione 1: Contenuti da Analizzare
+              <i data-lucide="media" class="w-4 h-4 text-indigo-400"></i> Sezione 1: Contenuti Social
             </h3>
-            
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               ${renderResources(cat.resources)}
             </div>
           </div>
 
-          <!-- SEZIONE 2: FORM INPUT STUDENTE -->
+          <!-- SEZIONE 2: INPUT STUDENTE -->
           <div class="bg-slate-900/80 border border-slate-700/80 rounded-2xl p-5 sm:p-6 space-y-4">
-            <div class="flex items-center gap-2">
-              <div class="p-2 bg-purple-500/10 text-purple-400 rounded-lg">
-                <i data-lucide="pen-tool" class="w-5 h-5"></i>
-              </div>
-              <div>
-                <h3 class="text-sm font-bold text-white">Sezione 2: La tua descrizione (Anonimo)</h3>
-                <p class="text-xs text-slate-400">Inserisci una parola che descrive i contenuti di questa categoria</p>
-              </div>
-            </div>
-
+            <h3 class="text-sm font-bold text-white">Sezione 2: La tua descrizione (Anonimo)</h3>
             <form onsubmit="handleWordSubmit(event, '${cat.id}')" class="flex flex-col sm:flex-row gap-3">
-              <input type="text" id="wordInput_${cat.id}" required placeholder="Scrivi una parola (es. Emozione, Fake, Trend...)" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-500">
-              <button type="submit" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white transition shadow-lg shadow-purple-600/20">
-                <i data-lucide="send" class="w-4 h-4"></i> Invia Parola
-              </button>
+              <input type="text" id="wordInput_${cat.id}" required placeholder="Scrivi una parola..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500">
+              <button type="submit" class="px-6 py-3 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition">Invia Parola</button>
             </form>
           </div>
 
-          <!-- SEZIONE 3: MURO DELLE PAROLE REAL-TIME -->
+          <!-- SEZIONE 3: MURO CLOUD -->
           <div class="space-y-4">
             <div class="flex items-center justify-between">
-              <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                <i data-lucide="cloud" class="w-4 h-4 text-emerald-400"></i> Sezione 3: Muro delle Parole della Classe
-              </h3>
+              <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Sezione 3: Muro delle Parole della Classe</h3>
               <span id="wordCountBadge_${cat.id}" class="text-xs text-slate-400 font-medium">0 parole</span>
             </div>
-
-            <div id="wordCloud_${cat.id}" class="min-h-[140px] bg-slate-900/40 border border-slate-800 rounded-2xl p-6 flex flex-wrap items-center justify-center gap-3">
-              <!-- Parole renderizzate qua -->
-            </div>
+            <div id="wordCloud_${cat.id}" class="min-h-[140px] bg-slate-900/40 border border-slate-800 rounded-2xl p-6 flex flex-wrap items-center justify-center gap-3"></div>
           </div>
         `;
 
@@ -483,46 +351,21 @@
       });
 
       lucide.createIcons();
-      triggerEmbedScriptProcess();
+      if (window.instgrm && window.instgrm.Embeds) window.instgrm.Embeds.process();
     }
 
-    // Renderizza le risorse
     function renderResources(resources) {
-      if (!resources || resources.length === 0) {
-        return `<p class="text-xs text-slate-500 italic col-span-full">Nessun contenuto multimediale allegato a questa categoria.</p>`;
-      }
-
+      if (!resources || resources.length === 0) return `<p class="text-xs text-slate-500 italic">Nessun contenuto multimediale allegato.</p>`;
       return resources.map(res => {
-        if (res.type === "embed") {
-          return `<div class="overflow-hidden rounded-xl border border-slate-700 bg-slate-900 p-2 flex justify-center">${res.content}</div>`;
-        }
+        if (res.type === "embed") return `<div class="overflow-hidden rounded-xl border border-slate-700 bg-slate-900 p-2 flex justify-center">${res.content}</div>`;
         if (res.type === "youtube") {
-          const videoId = extractYouTubeId(res.url);
-          return `<div class="aspect-video w-full rounded-xl overflow-hidden border border-slate-700 bg-slate-900">
-            <iframe class="w-full h-full" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
-          </div>`;
+          const videoId = res.url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/)?.[1] || "";
+          return `<div class="aspect-video rounded-xl overflow-hidden border border-slate-700 bg-slate-900"><iframe class="w-full h-full" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe></div>`;
         }
-        // Schede Link Instagram, TikTok o Generici
-        return `
-          <div class="bg-slate-900 border border-slate-700/80 rounded-xl p-4 flex flex-col justify-between gap-3 hover:border-slate-600 transition">
-            <div class="flex items-center gap-3">
-              <div class="p-2.5 rounded-lg bg-slate-800 text-indigo-400">
-                <i data-lucide="external-link" class="w-5 h-5"></i>
-              </div>
-              <div class="overflow-hidden">
-                <p class="text-xs font-bold text-slate-200 capitalize">${res.type} Link</p>
-                <p class="text-[11px] text-slate-400 truncate">${escapeHtml(res.url)}</p>
-              </div>
-            </div>
-            <a href="${escapeHtml(res.url)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 transition border border-slate-700">
-              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i> Apri Risorsa
-            </a>
-          </div>
-        `;
+        return `<div class="bg-slate-900 border border-slate-700 rounded-xl p-4 flex justify-between items-center"><span class="text-xs text-slate-300 truncate">${escapeHtml(res.url)}</span><a href="${escapeHtml(res.url)}" target="_blank" class="text-xs text-indigo-400 font-bold">Apri</a></div>`;
       }).join("");
     }
 
-    // Renderizza le parole inviate dagli studenti per categoria
     function renderCategoryWords(categoryId) {
       const cloud = document.getElementById(`wordCloud_${categoryId}`);
       const countBadge = document.getElementById(`wordCountBadge_${categoryId}`);
@@ -536,7 +379,6 @@
         return;
       }
 
-      // Conteggio Frequenze
       const freqMap = {};
       wordsForCat.forEach(w => {
         const word = w.word.toUpperCase();
@@ -544,93 +386,41 @@
       });
 
       cloud.innerHTML = Object.entries(freqMap).map(([word, count]) => {
-        // Calcolo dinamico della dimensione del testo in base alla frequenza
-        const sizeClass = count > 5 ? "text-2xl font-black text-amber-400" :
-                          count > 3 ? "text-xl font-bold text-indigo-300" :
-                          count > 1 ? "text-base font-semibold text-purple-300" :
-                                      "text-sm font-medium text-slate-300";
-
-        return `
-          <span class="animate-float inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 border border-slate-700 shadow-md ${sizeClass}">
-            ${escapeHtml(word)}
-            ${count > 1 ? `<span class="text-[10px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded-full font-sans">${count}</span>` : ""}
-          </span>
-        `;
+        const sizeClass = count > 5 ? "text-2xl font-black text-amber-400" : count > 3 ? "text-xl font-bold text-indigo-300" : count > 1 ? "text-base font-semibold text-purple-300" : "text-sm font-medium text-slate-300";
+        return `<span class="animate-float inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 ${sizeClass}">${escapeHtml(word)}${count > 1 ? `<span class="text-[10px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded-full">${count}</span>` : ""}</span>`;
       }).join("");
     }
 
-    // Eliminazione Categoria (Docente)
-    function deleteCategory(categoryId) {
-      if (!isTeacher) return;
-      if (confirm("Sei sicuro di voler eliminare questa categoria e le sue parole?")) {
-        categories = categories.filter(c => c.id !== categoryId);
-        wordEntries = wordEntries.filter(w => w.categoryId !== categoryId);
-        saveDataToStorage();
-        renderApp();
-      }
+    async function deleteCategory(categoryId) {
+      if (!isTeacher || !confirm("Eliminare questa categoria?")) return;
+      const { doc, deleteDoc } = window.fbMethods;
+      await deleteDoc(doc(window.db, "categories", categoryId));
     }
 
-    // Reset Totale (Docente)
-    function confirmResetAll() {
-      if (!isTeacher) return;
-      if (confirm("ATTENZIONE: Verranno cancellate TUTTE le categorie e le risposte della classe! Continuare?")) {
-        categories = [];
-        wordEntries = [];
-        saveDataToStorage();
-        renderApp();
-      }
+    async function confirmResetAll() {
+      if (!isTeacher || !confirm("Cancellare TUTTO il database?")) return;
+      const { collection, getDocs, deleteDoc, doc } = window.fbMethods;
+      const cats = await getDocs(collection(window.db, "categories"));
+      cats.forEach(async d => await deleteDoc(doc(window.db, "categories", d.id)));
+      const words = await getDocs(collection(window.db, "words"));
+      words.forEach(async d => await deleteDoc(doc(window.db, "words", d.id)));
     }
 
-    // Esportazione CSV
     function exportWordsCSV() {
-      if (wordEntries.length === 0) {
-        alert("Nessun dato da esportare.");
-        return;
-      }
-
-      let csvContent = "data:text/csv;charset=utf-8,Categoria,Parola,Data\n";
+      if (wordEntries.length === 0) return alert("Nessun dato presente.");
+      let csv = "data:text/csv;charset=utf-8,Categoria,Parola,Data\n";
       wordEntries.forEach(w => {
         const cat = categories.find(c => c.id === w.categoryId);
-        const catTitle = cat ? cat.title.replace(/,/g, " ") : "Generica";
-        csvContent += `"${catTitle}","${w.word}","${w.createdAt}"\n`;
+        csv += `"${cat ? cat.title : "Generica"}","${w.word}","${w.createdAt}"\n`;
       });
-
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `report_parole_classe_${Date.now()}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const a = document.createElement("a");
+      a.href = encodeURI(csv);
+      a.download = `report_parole_${Date.now()}.csv`;
+      a.click();
     }
 
-    // Helper Utilità
-    function escapeHtml(str) {
-      return str.replace(/[&<>"']/g, m => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
-      }[m]));
-    }
-
-    function extractYouTubeId(url) {
-      const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
-      return match ? match[1] : "";
-    }
-
-    function triggerEmbedScriptProcess() {
-      if (window.instgrm && window.instgrm.Embeds) {
-        window.instgrm.Embeds.process();
-      }
-    }
-
-    function showTemporaryToast(msg) {
-      const toast = document.createElement("div");
-      toast.className = "fixed bottom-5 right-5 z-50 bg-emerald-500 text-slate-950 px-4 py-2.5 rounded-xl font-bold text-xs shadow-2xl transition-all";
-      toast.textContent = msg;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 2500);
-    }
+    function escapeHtml(str) { return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m])); }
   </script>
-  <!-- Script Instagram Embed Ufficiale -->
   <script async src="//www.instagram.com/embed.js"></script>
 </body>
 </html>
